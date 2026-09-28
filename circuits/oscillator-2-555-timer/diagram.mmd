@@ -1,0 +1,25 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Antenna"))
+  PITCHOUT(("Pitch Signal Output"))
+
+  IC{{"Timer IC (NE555)"}}
+  DISCHARGE_R["Discharge Resistor, ~1 kΩ"]
+  THRESHOLD_R["Threshold Resistor, ~10 kΩ"]
+  TIMING_CAP["Timing Capacitor, ~100 pF, baseline"]
+  CONTROL_BYPASS_CAP["Control Voltage Bypass Capacitor, ~10 nF"]
+
+  PWR --- DISCHARGE_R
+  DISCHARGE_R ---|"Pin 7 (Discharge)"| IC
+  IC ---|"Pin 7 (Discharge)"| THRESHOLD_R
+  THRESHOLD_R ---|"Pin 6 (Threshold) and Pin 2 (Trigger)"| IC
+  IC ---|"Pin 6 (Threshold) and Pin 2 (Trigger)"| TIMING_CAP
+  TIMING_CAP --- GND
+  IC ---|"Pin 6 (Threshold) and Pin 2 (Trigger)"| ANTENNA
+  PWR ---|"Pin 4 (Reset)"| IC
+  IC ---|"Pin 5 (Control Voltage)"| CONTROL_BYPASS_CAP
+  CONTROL_BYPASS_CAP --- GND
+  IC ---|"Pin 3 (Output)"| PITCHOUT
+  IC ---|"Pin 8 (Positive Supply)"| PWR
+  IC ---|"Pin 1 (Ground)"| GND

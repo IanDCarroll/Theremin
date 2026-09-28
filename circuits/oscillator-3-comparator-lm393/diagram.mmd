@@ -1,0 +1,30 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Antenna"))
+  PITCHOUT(("Pitch Signal Output"))
+
+  IC{{"Comparator IC (LM393), one comparator used"}}
+  PULLUP_R["Pull-Up Resistor, ~10 kΩ"]
+  TIMING_R["Timing Resistor, ~10 kΩ"]
+  TIMING_CAP["Timing Capacitor, ~100 pF, baseline"]
+  HYSTERESIS_DIVIDER_UPPER["Hysteresis Divider Resistor (Upper), ~100 kΩ"]
+  HYSTERESIS_DIVIDER_LOWER["Hysteresis Divider Resistor (Lower), ~100 kΩ"]
+  HYSTERESIS_FEEDBACK_R["Hysteresis Feedback Resistor, ~1 MΩ"]
+
+  IC ---|"Output (Comparator A)"| PULLUP_R
+  PULLUP_R --- PWR
+  IC ---|"Output (Comparator A)"| PITCHOUT
+  IC ---|"Output (Comparator A)"| TIMING_R
+  TIMING_R ---|"Inverting Input (Comparator A)"| IC
+  IC ---|"Inverting Input (Comparator A)"| TIMING_CAP
+  TIMING_CAP --- GND
+  IC ---|"Inverting Input (Comparator A)"| ANTENNA
+  IC ---|"Output (Comparator A)"| HYSTERESIS_FEEDBACK_R
+  HYSTERESIS_FEEDBACK_R ---|"Non-Inverting Input (Comparator A)"| IC
+  PWR --- HYSTERESIS_DIVIDER_UPPER
+  HYSTERESIS_DIVIDER_UPPER ---|"Non-Inverting Input (Comparator A)"| IC
+  IC ---|"Non-Inverting Input (Comparator A)"| HYSTERESIS_DIVIDER_LOWER
+  HYSTERESIS_DIVIDER_LOWER --- GND
+  IC ---|"Positive Supply (V+)"| PWR
+  IC ---|"Ground"| GND

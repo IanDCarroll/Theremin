@@ -1,0 +1,76 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Antenna"))
+  PITCHOUT(("Pitch Signal Output"))
+
+  subgraph FO["Fixed Oscillator"]
+    FO_Q{{"NPN Transistor (2N3904)"}}
+    FO_IND["Tank Inductor, ~40 µH"]
+    FO_CAP_UP["Feedback Capacitor (Upper)"]
+    FO_CAP_LOW["Feedback Capacitor (Lower)"]
+    FO_BIAS_UP["Base Bias Resistor (Upper), ~47 kΩ"]
+    FO_BIAS_LOW["Base Bias Resistor (Lower), ~10 kΩ"]
+    FO_BYPASS["Base Bypass Capacitor, ~10 nF"]
+    FO_EMIT_R["Emitter Resistor, ~1 kΩ"]
+    FO_COUPLE["Output Coupling Capacitor"]
+
+    PWR --- FO_IND
+    FO_IND ---|"Collector"| FO_Q
+    FO_Q ---|"Collector"| FO_COUPLE
+    FO_Q ---|"Collector"| FO_CAP_UP
+    FO_Q ---|"Emitter"| FO_CAP_UP
+    FO_Q ---|"Emitter"| FO_CAP_LOW
+    FO_CAP_LOW --- GND
+    FO_Q ---|"Emitter"| FO_EMIT_R
+    FO_EMIT_R --- GND
+    PWR --- FO_BIAS_UP
+    FO_BIAS_UP ---|"Base"| FO_Q
+    FO_Q ---|"Base"| FO_BIAS_LOW
+    FO_BIAS_LOW --- GND
+    FO_Q ---|"Base"| FO_BYPASS
+    FO_BYPASS --- GND
+  end
+
+  subgraph VO["Variable Antenna Oscillator"]
+    VO_Q{{"NPN Transistor (2N3904)"}}
+    VO_IND["Tank Inductor, ~40 µH"]
+    VO_CAP_UP["Feedback Capacitor (Upper)"]
+    VO_CAP_LOW["Feedback Capacitor (Lower)"]
+    VO_BIAS_UP["Base Bias Resistor (Upper), ~47 kΩ"]
+    VO_BIAS_LOW["Base Bias Resistor (Lower), ~10 kΩ"]
+    VO_BYPASS["Base Bypass Capacitor, ~10 nF"]
+    VO_EMIT_R["Emitter Resistor, ~1 kΩ"]
+    VO_COUPLE["Output Coupling Capacitor"]
+
+    PWR --- VO_IND
+    VO_IND ---|"Collector"| VO_Q
+    VO_Q ---|"Collector"| VO_COUPLE
+    VO_Q ---|"Collector"| VO_CAP_UP
+    VO_Q ---|"Emitter"| VO_CAP_UP
+    VO_Q ---|"Emitter"| VO_CAP_LOW
+    VO_CAP_LOW --- GND
+    VO_Q ---|"Emitter"| ANTENNA
+    VO_Q ---|"Emitter"| VO_EMIT_R
+    VO_EMIT_R --- GND
+    PWR --- VO_BIAS_UP
+    VO_BIAS_UP ---|"Base"| VO_Q
+    VO_Q ---|"Base"| VO_BIAS_LOW
+    VO_BIAS_LOW --- GND
+    VO_Q ---|"Base"| VO_BYPASS
+    VO_BYPASS --- GND
+  end
+
+  subgraph MIX["Mixer and Low-Pass Filter"]
+    MIX_DIODE["Mixer Diode (1N4148)"]
+    LPF_RES["Low-Pass Filter Resistor, ~10 kΩ"]
+    LPF_CAP["Low-Pass Filter Capacitor, ~1 nF"]
+
+    FO_COUPLE ---|"Anode"| MIX_DIODE
+    VO_COUPLE ---|"Anode"| MIX_DIODE
+    MIX_DIODE ---|"Cathode"| PITCHOUT
+    PITCHOUT --- LPF_RES
+    LPF_RES --- GND
+    PITCHOUT --- LPF_CAP
+    LPF_CAP --- GND
+  end

@@ -1,0 +1,66 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Antenna"))
+  PITCHOUT(("Pitch Signal Output"))
+
+  subgraph FO["Fixed Oscillator"]
+    FO_Q{{"NPN Transistor (2N3904)"}}
+    FO_IND["Tapped Inductor"]
+    FO_TANKCAP["Tank Capacitor, spans full coil"]
+    FO_GRID_CAP["Grid-Leak-Style Coupling Capacitor"]
+    FO_GRID_RES["Grid-Leak-Style Bias Resistor, ~1 MΩ"]
+    FO_CATHODE_R["Cathode-Style Emitter Resistor, ~220 Ω, unbypassed"]
+    FO_COUPLE["Output Coupling Capacitor"]
+
+    PWR ---|"Collector"| FO_Q
+    FO_Q ---|"Collector / Coil Top"| FO_IND
+    FO_IND ---|"Coil Tap"| FO_GRID_CAP
+    FO_GRID_CAP ---|"Base"| FO_Q
+    FO_IND ---|"Coil Bottom"| GND
+    FO_Q ---|"Collector"| FO_TANKCAP
+    FO_TANKCAP --- GND
+    FO_Q ---|"Collector"| FO_COUPLE
+    FO_Q ---|"Base"| FO_GRID_RES
+    FO_GRID_RES --- GND
+    FO_Q ---|"Emitter"| FO_CATHODE_R
+    FO_CATHODE_R --- GND
+  end
+
+  subgraph VO["Variable Antenna Oscillator"]
+    VO_Q{{"NPN Transistor (2N3904)"}}
+    VO_IND["Tapped Inductor"]
+    VO_TANKCAP["Tank Capacitor, spans full coil"]
+    VO_GRID_CAP["Grid-Leak-Style Coupling Capacitor"]
+    VO_GRID_RES["Grid-Leak-Style Bias Resistor, ~1 MΩ"]
+    VO_CATHODE_R["Cathode-Style Emitter Resistor, ~220 Ω, unbypassed"]
+    VO_COUPLE["Output Coupling Capacitor"]
+
+    PWR ---|"Collector"| VO_Q
+    VO_Q ---|"Collector / Coil Top"| VO_IND
+    VO_IND ---|"Coil Tap"| VO_GRID_CAP
+    VO_GRID_CAP ---|"Base"| VO_Q
+    VO_IND ---|"Coil Bottom"| GND
+    VO_Q ---|"Collector"| VO_TANKCAP
+    VO_TANKCAP --- GND
+    VO_Q ---|"Collector"| ANTENNA
+    VO_Q ---|"Collector"| VO_COUPLE
+    VO_Q ---|"Base"| VO_GRID_RES
+    VO_GRID_RES --- GND
+    VO_Q ---|"Emitter"| VO_CATHODE_R
+    VO_CATHODE_R --- GND
+  end
+
+  subgraph MIX["Mixer and Low-Pass Filter"]
+    MIX_DIODE["Mixer Diode (1N4148)"]
+    LPF_RES["Low-Pass Filter Resistor, ~10 kΩ"]
+    LPF_CAP["Low-Pass Filter Capacitor, ~1 nF"]
+
+    FO_COUPLE ---|"Anode"| MIX_DIODE
+    VO_COUPLE ---|"Anode"| MIX_DIODE
+    MIX_DIODE ---|"Cathode"| PITCHOUT
+    PITCHOUT --- LPF_RES
+    LPF_RES --- GND
+    PITCHOUT --- LPF_CAP
+    LPF_CAP --- GND
+  end

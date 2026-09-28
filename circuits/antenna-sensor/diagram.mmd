@@ -1,0 +1,7 @@
+flowchart TD
+  HAND(("Hand"))
+  ANTENNA["Antenna"]
+  OSC_NODE(("To Oscillator, Sensing Node"))
+
+  HAND -. "Variable Capacitance\n(field coupling, not a wire)" .- ANTENNA
+  ANTENNA --- |"Charge/Discharge Path\n(driven by oscillator)"| OSC_NODE

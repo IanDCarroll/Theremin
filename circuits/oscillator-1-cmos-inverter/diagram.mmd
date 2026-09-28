@@ -1,0 +1,18 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Antenna"))
+  PITCHOUT(("Pitch Signal Output"))
+
+  IC{{"Hex Inverter IC (CD4069UB), one gate used"}}
+  FEEDBACK_R["Feedback Resistor, ~4.7 MΩ"]
+  TIMING_CAP["Timing Capacitor, ~100 pF, baseline"]
+
+  IC ---|"Output (Inverter Gate)"| PITCHOUT
+  IC ---|"Output (Inverter Gate)"| FEEDBACK_R
+  FEEDBACK_R ---|"Input (Inverter Gate)"| IC
+  IC ---|"Input (Inverter Gate)"| TIMING_CAP
+  TIMING_CAP --- GND
+  IC ---|"Input (Inverter Gate)"| ANTENNA
+  IC ---|"Positive Supply (VDD)"| PWR
+  IC ---|"Ground (VSS)"| GND
