@@ -113,12 +113,18 @@ a small (~1–10 kΩ) resistor in series between the Antenna and Design
 **Antenna shape/geometry (rod, plate, loop).** Research turned up real
 alternatives here — a vertical rod, a flat plate, and a loop are all
 documented antenna geometries, and they meaningfully affect playing
-ergonomics and field linearity (see Research links). But none of that
-is a *circuit* difference: electrically, a plate and a rod both do
-exactly the same job — one conductor, one wire, into the oscillator's
-sensing node. So it doesn't produce a second circuit diagram, only a
-mechanical/physical decision to make later when we pick and mount an
-actual antenna.
+ergonomics and field linearity (see Research links). None of that
+changes the *wiring*: electrically, a plate and a rod both do exactly
+the same job — one conductor, one wire, into the oscillator's sensing
+node. So it doesn't produce a second circuit diagram. It does change two
+numbers the circuit depends on, though: the antenna's baseline
+capacitance and the size of the hand-dependent change. Those set how the
+oscillator's tank has to be sized, and how the instrument feels to play
+(see [ANTENNA-CAPACITIVE-SENSOR.md](../../notes/ANTENNA-CAPACITIVE-SENSOR.md),
+"What the tank value means for the player"). So swapping geometry later
+is a mechanical decision *and* a retuning exercise: not a different
+diagram, but possibly different component values, and neither
+number has been measured yet.
 
 ## Research links
 

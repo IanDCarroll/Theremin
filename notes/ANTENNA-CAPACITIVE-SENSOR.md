@@ -1,7 +1,7 @@
 # The Antenna: A Capacitor That Isn't a Component
 
-Research notes on the *sensing* half of the pitch circuit — how the
-antenna and the player's body form a capacitor at all. This is
+Research notes on the *sensing* half of the pitch and volume circuits —
+how the antenna and the player's body form a capacitor at all. This is
 deliberately split out from [CAPACITORS.md](CAPACITORS.md), which is
 about selecting physical capacitor *components* to buy and place in the
 circuit. The antenna's "capacitor" isn't a part we purchase — it's a
@@ -90,6 +90,51 @@ conflate:
   this tiny delta — not the body's absolute 100–200 pF figure — that a
   well-designed theremin circuit is actually built to resolve.
 
+## What the tank value means for the player
+
+The tank is the inductor and capacitor the antenna's capacitance gets
+added to. Its values never show up as a number to a player; they show up
+as how the instrument *feels*. A first-order approximation (standard, from
+f = 1/(2π√(LC)); a reviewer can re-derive it) for a small hand-dependent
+change ΔC on top of a total tank capacitance C (tank capacitor plus the
+antenna's baseline) is:
+
+  Δf ≈ −f · ΔC / (2C)
+
+So the same hand movement produces a bigger frequency change when the
+total capacitance C is *smaller* or the oscillator frequency f is
+*higher*. Illustration only (not measured): ΔC = 2 pF on C = 100 pF at
+300 kHz moves the frequency about 3 kHz; the same ΔC on C = 400 pF
+moves it about 0.4 kHz at the same f. In a heterodyne pair that
+difference is what the player hears as pitch range.
+
+What that means in the hand:
+
+| Tank change | What the player experiences |
+|---|---|
+| Smaller total capacitance (smaller tank capacitor, or an antenna with less baseline) | More sensitive: the pitch range is spread across more hand travel *per pF*, so notes sit in a smaller space and the instrument feels twitchy. Longer reach from the antenna, since a smaller ΔC at a distance still registers. Also less stable: stray capacitance changes from a person walking in, or humidity, shift the null more |
+| Larger total capacitance | Calmer and steadier, with more room between notes. Shorter reach, and the top of the range may not be reachable at all |
+| Higher oscillator frequency | The same fractional shift becomes more Hz, so more range for the same hand movement; layout and stray capacitance get harder to manage |
+| Larger L with smaller C at the same f | Same frequency, but higher sensitivity and higher susceptibility to stray capacitance |
+| Antenna baseline outside the trimmer's range | The player cannot null the instrument at all: it has a background tone with the hand far away |
+
+Two things the tank does *not* fix:
+
+- **Note spacing versus distance.** The hand-dependent capacitance
+  change rises steeply as the hand nears the antenna, so notes crowd
+  together close in and spread out far away. That curve comes mainly
+  from the antenna's geometry and field, not from the tank (my
+  reasoning, not researched; to be checked on a bench).
+- **Playing skill.** Higher sensitivity buys expressiveness and reach
+  but demands finer hand control; lower sensitivity forgives errors and
+  limits nuance. There is no objectively right setting, only a choice
+  about who the instrument is for.
+
+For volume (see [VOLUME-OSCILLATOR.md](VOLUME-OSCILLATOR.md)), the same
+logic sets how much hand travel takes the level from full to silence: too
+sensitive and the dynamic range is squeezed into a small, fiddly space;
+too insensitive and silence or full volume cannot be reached.
+
 ## What this means for our build
 
 Two practical takeaways, distinct from anything in
@@ -117,6 +162,43 @@ The circuit-side diagram of this element (the antenna as a single wire
 into the oscillator's sensing node, plus what research turned up on
 optional ESD protection and antenna geometry) is in
 [circuits/antenna-sensor/](../circuits/antenna-sensor/README.md).
+
+## One antenna block, used twice (pitch and volume)
+
+The antenna is its own block in the circuit diagrams
+([circuits/antenna-sensor/](../circuits/antenna-sensor/README.md)), and
+the same block serves both channels: a conductor whose capacitance to its
+surroundings shifts with the hand. What differs between pitch and volume
+is only what happens downstream (see
+[PITCH-OSCILLATOR.md](PITCH-OSCILLATOR.md) and
+[VOLUME-OSCILLATOR.md](VOLUME-OSCILLATOR.md)).
+
+**The boundary.** The antenna block's output is a capacitance to ground
+at a single wire into the oscillator's sensing node: a baseline value
+(wiring, shape, room) plus the hand-dependent change. The oscillator
+does not know what kind of conductor is attached, and the antenna knows
+nothing about the oscillator. The baseline-nulling trimmer described
+above sits on the oscillator side of the wire, in the tank, not in the
+antenna.
+
+**A natural test point.** Replace the antenna with a fixed or variable
+(trimmer) capacitor of a known value to test an oscillator and
+everything after it with no hand or room involved. That is repeatable
+in a way a real antenna is not, since the real one drifts with the room.
+
+**Geometry.** Rod, plate and loop are all documented antenna shapes
+(see the links in
+[circuits/antenna-sensor/](../circuits/antenna-sensor/README.md)), and the
+classic arrangement is a vertical rod for pitch and a horizontal loop for
+volume. Geometry is a mechanical and playing-feel choice, with one
+electrical consequence worth noting: it changes the baseline
+capacitance and the size of the hand-dependent change, so the
+oscillator's tank has to be sized for the antenna actually used. The
+pitch and volume antennas also couple to each other if placed close
+together, which adds to the channel-pulling problem noted in
+[VOLUME-OSCILLATOR.md](VOLUME-OSCILLATOR.md). Neither point is researched
+beyond the sources already linked; the baseline and delta figures for each
+shape would need measuring.
 
 ## Research links
 
