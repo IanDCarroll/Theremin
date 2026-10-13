@@ -118,8 +118,8 @@ air, and the player — is in
 [ANTENNA-CAPACITIVE-SENSOR.md](notes/ANTENNA-CAPACITIVE-SENSOR.md).
 
 Five concrete candidate circuits for the pitch oscillator (CMOS
-inverter, 555, comparator IC, historical-analog heterodyne, heterodyne),
-ordered least to most complex and each diagrammed and compared, are in
+inverter, 555, comparator IC, RCA historical analog, Colpitts heterodyne),
+ordered by part count for the first three and by kind after that and each diagrammed and compared, are in
 [OSCILLATOR-DESIGNS.md](circuits/OSCILLATOR-DESIGNS.md). How we diagram circuits
 at all — the tooling decision and the diagram convention — is in
 [DIAGRAMMING.md](circuits/DIAGRAMMING.md).

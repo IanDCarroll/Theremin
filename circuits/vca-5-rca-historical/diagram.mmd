@@ -1,0 +1,71 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  AUDIOIN(("Pitch Audio Input"))
+  CVIN(("Volume Control Voltage Input"))
+  AUDIOOUT(("Scaled Audio Output"))
+
+  subgraph SUPPLYVALVE["Supply Valve (the filament-heated diode's role)"]
+    SV_Q{{"Supply Valve Transistor (2N3904)"}}
+    LAG_R["Control Lag Resistor, ~10 kΩ"]
+    LAG_C["Control Lag Capacitor, ~10 µF"]
+    SV_EMITTER_R["Supply Valve Emitter Resistor (adjustable), ~1.2 kΩ"]
+    PS_BYPASS_C["Plate Supply Bypass Capacitor, ~0.5 µF"]
+    PLATE_SUPPLY@{ shape: fork, label: "Junction, Plate Supply" }
+
+    CVIN --- LAG_R
+    LAG_R ---|"Base"| SV_Q
+    LAG_C ---|"Base"| SV_Q
+    LAG_C --- GND
+    PWR ---|"Collector"| SV_Q
+    SV_Q ---|"Emitter"| SV_EMITTER_R
+    SV_EMITTER_R --- PLATE_SUPPLY
+    PS_BYPASS_C --- PLATE_SUPPLY
+    PS_BYPASS_C --- GND
+  end
+
+  subgraph INPUTDIV["Input Divider"]
+    IN_TOP_R["Input Series Resistor, ~30 kΩ"]
+    IN_BOTTOM_R["Input Shunt Resistor, ~10 kΩ"]
+    IN_COUPLE_C["Input Coupling Capacitor, ~1 µF"]
+    DIVIDER_NODE@{ shape: fork, label: "Junction, Divided Audio" }
+
+    AUDIOIN --- IN_TOP_R
+    IN_TOP_R --- DIVIDER_NODE
+    DIVIDER_NODE --- IN_BOTTOM_R
+    IN_BOTTOM_R --- GND
+    DIVIDER_NODE --- IN_COUPLE_C
+  end
+
+  subgraph PREAMP["Gain-Controlled Stage (the audio preamplifier tube's role)"]
+    PRE_Q{{"Preamplifier JFET (2N5484)"}}
+    PRE_GATE_LEAK_R["Grid-Leak-Style Gate Resistor, ~1 MΩ"]
+    PLATE_R["Plate-Load-Style Drain Resistor, ~470 Ω"]
+    PRE_OUT_C["Interstage Coupling Capacitor, ~1 µF"]
+
+    IN_COUPLE_C ---|"Gate"| PRE_Q
+    PRE_GATE_LEAK_R ---|"Gate"| PRE_Q
+    PRE_GATE_LEAK_R --- GND
+    PRE_Q ---|"Source"| GND
+    PRE_Q ---|"Drain"| PLATE_R
+    PLATE_R --- PLATE_SUPPLY
+    PRE_Q ---|"Drain"| PRE_OUT_C
+  end
+
+  subgraph POWERAMP["Output Stage (the audio power amplifier tube's role)"]
+    OUT_Q{{"Output Stage JFET (2N5484)"}}
+    OUT_GATE_LEAK_R["Grid-Leak-Style Gate Resistor, ~1 MΩ"]
+    OUT_SOURCE_R["Cathode-Style Source Resistor, ~430 Ω, unbypassed"]
+    OUT_DRAIN_R["Plate-Load-Style Drain Resistor, ~2.7 kΩ"]
+    OUTPUT_COUPLE["Output Coupling Capacitor, ~1 µF"]
+
+    PRE_OUT_C ---|"Gate"| OUT_Q
+    OUT_GATE_LEAK_R ---|"Gate"| OUT_Q
+    OUT_GATE_LEAK_R --- GND
+    OUT_Q ---|"Source"| OUT_SOURCE_R
+    OUT_SOURCE_R --- GND
+    OUT_Q ---|"Drain"| OUT_DRAIN_R
+    OUT_DRAIN_R --- PWR
+    OUT_Q ---|"Drain"| OUTPUT_COUPLE
+    OUTPUT_COUPLE --- AUDIOOUT
+  end

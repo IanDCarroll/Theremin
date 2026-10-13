@@ -100,9 +100,16 @@ choice within either architecture.
 
 Vacuum tubes (triodes) as the active/gain device in exactly the
 heterodyne architecture described above: two LC oscillators, one fixed
-and one whose tank capacitance included the antenna and (via body
-capacitance) the performer's hand, mixed together to produce an audible
-beat frequency. The 555 timer didn't exist until 1971 — Theremin's 1920
+and one pulled by the antenna and (via body capacitance) the
+performer's hand, mixed together to produce an audible beat frequency.
+The primary sources are Theremin's own patent, [US
+1,661,058](https://patents.google.com/patent/US1661058A/en) (filed
+1925), which shows the architecture without naming an oscillator
+topology, and the 1929 RCA AR-1264 schematic redrawn at
+[theremin.us](https://theremin.us/RCA/rca_theremin.html), whose
+oscillators are Armstrong types (coupled grid and plate coils). The
+repo's historical designs follow these, in that order
+([oscillator-4-rca-historical](../circuits/oscillator-4-rca-historical/README.md)). The 555 timer didn't exist until 1971 — Theremin's 1920
 instrument achieved the same job using vacuum tube oscillators, decades
 before transistors, op-amps, or ICs existed to do it any other way.
 

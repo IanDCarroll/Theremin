@@ -1,0 +1,104 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Antenna"))
+  PITCHOUT(("Pitch Signal Output"))
+
+  subgraph SUPPLY["Supply Decoupling"]
+    DECOUPLE_R["Supply Decoupling Resistor, ~470 Ω"]
+    DECOUPLE_C["Supply Decoupling Capacitor, ~47 µF"]
+    SUPPLY_NODE@{ shape: fork, label: "Junction, Decoupled Supply" }
+
+    PWR --- DECOUPLE_R
+    DECOUPLE_R --- SUPPLY_NODE
+    DECOUPLE_C --- SUPPLY_NODE
+    DECOUPLE_C --- GND
+  end
+
+  subgraph REF["Pitch Reference Oscillator"]
+    REF_Q{{"Reference Oscillator JFET (2N5484)"}}
+    REF_PLATE_COIL["Plate Coil (Tickler), ~0.27 mH"]
+    REF_GRID_COIL["Grid Coil, ~0.47 mH"]
+    REF_TUNE_CAP["Pitch Tuning Capacitor, ~55 pF variable"]
+    REF_FB_ADJUST_CAP["Plate-to-Grid Capacitor (adjustable), ~100 pF variable"]
+    REF_FB_CAP["Plate-to-Grid Capacitor, ~1000 pF"]
+    REF_LEAK_R["Grid-Leak-Style Return Resistor, ~100 kΩ"]
+    REF_LEAK_C["Grid Return Bypass Capacitor, ~22 nF"]
+    REF_LEAK_NODE@{ shape: fork, label: "Junction, Grid Coil Return" }
+
+    REF_PLATE_COIL -. "Magnetic Coupling\n(not a wire)" .- REF_GRID_COIL
+    REF_Q ---|"Drain"| REF_PLATE_COIL
+    REF_PLATE_COIL --- SUPPLY_NODE
+    REF_Q ---|"Gate"| REF_GRID_COIL
+    REF_GRID_COIL --- REF_LEAK_NODE
+    REF_LEAK_NODE --- REF_LEAK_R
+    REF_LEAK_NODE --- REF_LEAK_C
+    REF_LEAK_R --- GND
+    REF_LEAK_C --- GND
+    REF_Q ---|"Gate"| REF_TUNE_CAP
+    REF_TUNE_CAP --- GND
+    REF_Q ---|"Drain"| REF_FB_ADJUST_CAP
+    REF_FB_ADJUST_CAP ---|"Gate"| REF_Q
+    REF_Q ---|"Drain"| REF_FB_CAP
+    REF_FB_CAP ---|"Gate"| REF_Q
+    REF_Q ---|"Source"| GND
+  end
+
+  subgraph VAR["Pitch Variable Oscillator and Antenna Circuit"]
+    VAR_Q{{"Variable Oscillator JFET (2N5484)"}}
+    VAR_PLATE_COIL["Plate Coil (Tickler), ~0.27 mH"]
+    VAR_GRID_COIL["Grid Coil, ~0.47 mH"]
+    VAR_FB_ADJUST_CAP["Plate-to-Grid Capacitor (adjustable), ~100 pF variable"]
+    VAR_FB_CAP["Plate-to-Grid Capacitor, ~1000 pF"]
+    VAR_LEAK_R["Grid-Leak-Style Return Resistor, ~100 kΩ"]
+    VAR_LEAK_C["Grid Return Bypass Capacitor, ~22 nF"]
+    VAR_LEAK_NODE@{ shape: fork, label: "Junction, Grid Coil Return" }
+    ANT_SMALL_COIL["Concentrated Coil, ~7 mH"]
+    ANT_COUPLE_C["Antenna Blocking Capacitor, ~2200 pF"]
+    ANT_BIG_COIL["Antenna Coil, ~50 mH"]
+
+    VAR_PLATE_COIL -. "Magnetic Coupling\n(not a wire)" .- VAR_GRID_COIL
+    VAR_Q ---|"Drain"| VAR_PLATE_COIL
+    VAR_PLATE_COIL --- SUPPLY_NODE
+    VAR_Q ---|"Gate"| VAR_GRID_COIL
+    VAR_GRID_COIL --- VAR_LEAK_NODE
+    VAR_LEAK_NODE --- VAR_LEAK_R
+    VAR_LEAK_NODE --- VAR_LEAK_C
+    VAR_LEAK_R --- GND
+    VAR_LEAK_C --- GND
+    VAR_Q ---|"Drain"| VAR_FB_ADJUST_CAP
+    VAR_FB_ADJUST_CAP ---|"Gate"| VAR_Q
+    VAR_Q ---|"Drain"| VAR_FB_CAP
+    VAR_FB_CAP ---|"Gate"| VAR_Q
+    VAR_Q ---|"Source"| GND
+    VAR_Q ---|"Gate"| ANT_SMALL_COIL
+    ANT_SMALL_COIL --- ANT_COUPLE_C
+    ANT_COUPLE_C --- ANT_BIG_COIL
+    ANT_BIG_COIL --- ANTENNA
+  end
+
+  subgraph MIX["Mixer (dual-control stage)"]
+    MIX_LOW_Q{{"Lower Mixer JFET (2N5484)"}}
+    MIX_UP_Q{{"Upper Mixer JFET (2N5484)"}}
+    MIX_INJECT_R["Injection Resistor, ~10 kΩ"]
+    MIX_INJECT_C["Injection Coupling Capacitor, ~10 nF"]
+    MIX_GATE_BIAS_R["Upper Gate Bias Resistor, ~1 MΩ"]
+    MIX_LOAD_R["Plate-Load-Style Drain Resistor, ~2.2 kΩ"]
+    MIX_SUM_BYPASS_C["Sum-Frequency Bypass Capacitor, ~2.2 nF"]
+    MIX_OUT_C["Output Coupling Capacitor, ~1 µF"]
+
+    REF_Q ---|"Gate / Gate"| MIX_LOW_Q
+    MIX_LOW_Q ---|"Source"| GND
+    MIX_LOW_Q ---|"Drain / Source"| MIX_UP_Q
+    VAR_Q ---|"Gate"| MIX_INJECT_R
+    MIX_INJECT_R --- MIX_INJECT_C
+    MIX_INJECT_C ---|"Gate"| MIX_UP_Q
+    MIX_UP_Q ---|"Gate"| MIX_GATE_BIAS_R
+    MIX_GATE_BIAS_R ---|"Source"| MIX_UP_Q
+    MIX_UP_Q ---|"Drain"| MIX_LOAD_R
+    MIX_LOAD_R --- SUPPLY_NODE
+    MIX_UP_Q ---|"Drain"| MIX_SUM_BYPASS_C
+    MIX_SUM_BYPASS_C --- GND
+    MIX_UP_Q ---|"Drain"| MIX_OUT_C
+    MIX_OUT_C --- PITCHOUT
+  end

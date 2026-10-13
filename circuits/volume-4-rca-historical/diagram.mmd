@@ -1,0 +1,72 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Volume Antenna"))
+  VOLUMEOUT(("Volume Control Voltage Output"))
+
+  subgraph SUPPLY["Supply Decoupling"]
+    DECOUPLE_R["Supply Decoupling Resistor, ~470 Ω"]
+    DECOUPLE_C["Supply Decoupling Capacitor, ~47 µF"]
+    SUPPLY_NODE@{ shape: fork, label: "Junction, Decoupled Supply" }
+
+    PWR --- DECOUPLE_R
+    DECOUPLE_R --- SUPPLY_NODE
+    DECOUPLE_C --- SUPPLY_NODE
+    DECOUPLE_C --- GND
+  end
+
+  subgraph REF["Volume Oscillator"]
+    REF_Q{{"Volume Oscillator JFET (2N5484)"}}
+    REF_PLATE_COIL["Plate Coil (Tickler), ~0.09 mH"]
+    REF_GRID_COIL["Grid Coil, ~0.15 mH"]
+    REF_TUNE_CAP["Volume Tuning Capacitor, ~135 pF variable"]
+    REF_FB_ADJUST_CAP["Plate-to-Grid Capacitor (adjustable), ~100 pF variable"]
+    REF_FB_CAP["Plate-to-Grid Capacitor, ~500 pF"]
+    REF_LEAK_R["Grid-Leak-Style Return Resistor, ~100 kΩ"]
+    REF_LEAK_C["Grid Return Bypass Capacitor, ~22 nF"]
+    REF_LEAK_NODE@{ shape: fork, label: "Junction, Grid Coil Return" }
+
+    REF_PLATE_COIL -. "Magnetic Coupling\n(not a wire)" .- REF_GRID_COIL
+    REF_Q ---|"Drain"| REF_PLATE_COIL
+    REF_PLATE_COIL --- SUPPLY_NODE
+    REF_Q ---|"Gate"| REF_GRID_COIL
+    REF_GRID_COIL --- REF_LEAK_NODE
+    REF_LEAK_NODE --- REF_LEAK_R
+    REF_LEAK_NODE --- REF_LEAK_C
+    REF_LEAK_R --- GND
+    REF_LEAK_C --- GND
+    REF_Q ---|"Gate"| REF_TUNE_CAP
+    REF_TUNE_CAP --- GND
+    REF_Q ---|"Drain"| REF_FB_ADJUST_CAP
+    REF_FB_ADJUST_CAP ---|"Gate"| REF_Q
+    REF_Q ---|"Drain"| REF_FB_CAP
+    REF_FB_CAP ---|"Gate"| REF_Q
+    REF_Q ---|"Source"| GND
+  end
+
+  subgraph LOOP["Volume Antenna Loop (tuned below the oscillator)"]
+    LOOP_COIL["Antenna Coil (Loop Primary), ~10 mH"]
+    LOOP_COUPLE_C["Loop Coupling Capacitor, ~2200 pF"]
+    PICKUP_COIL["Pickup Coil (Loop Secondary), sized so the full-volume peak is about 7 V"]
+
+    REF_Q ---|"Gate"| LOOP_COUPLE_C
+    LOOP_COUPLE_C --- LOOP_COIL
+    LOOP_COIL --- ANTENNA
+    LOOP_COIL -. "Magnetic Coupling\n(not a wire)" .- PICKUP_COIL
+  end
+
+  subgraph DETECT["Detector (stands in for the heated filament)"]
+    DETECT_DIODE["Detector Diode (1N5711)"]
+    DETECT_RESERVOIR_C["Reservoir Capacitor, ~1 µF"]
+    DETECT_LEVEL_POT["Level Potentiometer, ~10 kΩ (also the load)"]
+    DETECT_NODE@{ shape: fork, label: "Junction, Detected Level" }
+
+    PICKUP_COIL ---|"Anode"| DETECT_DIODE
+    PICKUP_COIL --- GND
+    DETECT_DIODE ---|"Cathode"| DETECT_NODE
+    DETECT_NODE --- DETECT_RESERVOIR_C
+    DETECT_RESERVOIR_C --- GND
+    DETECT_NODE ---|"Top End"| DETECT_LEVEL_POT
+    DETECT_LEVEL_POT ---|"Bottom End"| GND
+    DETECT_LEVEL_POT ---|"Wiper"| VOLUMEOUT
+  end
