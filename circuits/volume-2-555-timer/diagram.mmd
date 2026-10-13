@@ -1,0 +1,60 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Volume Antenna"))
+  VOLUMEOUT(("Volume Control Voltage Output"))
+
+  subgraph OSC["Volume Oscillator, mirrors Design 2"]
+    IC{{"Timer IC (NE555)"}}
+    DISCHARGE_R["Discharge Resistor, ~1 kΩ"]
+    THRESHOLD_R["Threshold Resistor, ~680 kΩ"]
+    TIMING_CAP["Timing Capacitor, ~100 pF, baseline"]
+    CONTROL_BYPASS_CAP["Control Voltage Bypass Capacitor, ~10 nF"]
+    PWR --- DISCHARGE_R
+    DISCHARGE_R ---|"Pin 7 (Discharge)"| IC
+    IC ---|"Pin 7 (Discharge)"| THRESHOLD_R
+    THRESHOLD_R ---|"Pin 6 (Threshold) and Pin 2 (Trigger)"| IC
+    IC ---|"Pin 6 (Threshold) and Pin 2 (Trigger)"| TIMING_CAP
+    TIMING_CAP --- GND
+    IC ---|"Pin 6 (Threshold) and Pin 2 (Trigger)"| ANTENNA
+    PWR ---|"Pin 4 (Reset)"| IC
+    IC ---|"Pin 5 (Control Voltage)"| CONTROL_BYPASS_CAP
+    CONTROL_BYPASS_CAP --- GND
+    IC ---|"Pin 8 (Positive Supply)"| PWR
+    IC ---|"Pin 1 (Ground)"| GND
+  end
+
+  subgraph F2V["Frequency-to-Voltage Converter and Control Voltage Conditioning"]
+    F2V_IC{{"Frequency-to-Voltage IC (LM2907-N, 8-pin)"}}
+    F2V_INPUT_COUPLE["Input Coupling Capacitor, ~330 nF"]
+    F2V_INPUT_R["Input Bias Resistor, ~100 kΩ"]
+    F2V_TIMING_CAP["Pump Timing Capacitor, ~1 nF"]
+    F2V_OUTPUT_R["Pump Output Resistor, ~47 kΩ"]
+    F2V_RIPPLE_CAP["Ripple Filter Capacitor, ~1 µF"]
+    F2V_LOAD_R["Emitter Load Resistor, ~10 kΩ"]
+    COND_FEEDBACK_R["Gain Feedback Resistor, ~100 kΩ"]
+    COND_GAIN_R["Gain Resistor, ~3.3 kΩ"]
+    COND_FLOOR_TRIM["Floor Trimmer, ~10 kΩ"]
+
+    IC ---|"Pin 3 (Output)"| F2V_INPUT_COUPLE
+    F2V_INPUT_COUPLE ---|"Pin 1 (TACH+)"| F2V_IC
+    F2V_IC ---|"Pin 1 (TACH+)"| F2V_INPUT_R
+    F2V_INPUT_R --- GND
+    F2V_IC ---|"Pin 8 (TACH−/GND)"| GND
+    F2V_IC ---|"Pin 2 (CP1)"| F2V_TIMING_CAP
+    F2V_TIMING_CAP --- GND
+    F2V_IC ---|"Pin 3 (CP2/IN+)"| F2V_OUTPUT_R
+    F2V_OUTPUT_R --- GND
+    F2V_IC ---|"Pin 3 (CP2/IN+)"| F2V_RIPPLE_CAP
+    F2V_RIPPLE_CAP --- GND
+    F2V_IC ---|"Pin 5 (COL) and Pin 6 (V+)"| PWR
+    F2V_IC ---|"Pin 4 (EMIT)"| F2V_LOAD_R
+    F2V_LOAD_R --- GND
+    F2V_IC ---|"Pin 4 (EMIT)"| COND_FEEDBACK_R
+    COND_FEEDBACK_R ---|"Pin 7 (IN−)"| F2V_IC
+    F2V_IC ---|"Pin 7 (IN−)"| COND_GAIN_R
+    COND_GAIN_R ---|"Wiper"| COND_FLOOR_TRIM
+    COND_FLOOR_TRIM ---|"End (Supply Side)"| PWR
+    COND_FLOOR_TRIM ---|"End (Ground Side)"| GND
+    F2V_IC ---|"Pin 4 (EMIT)"| VOLUMEOUT
+  end

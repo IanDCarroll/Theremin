@@ -52,7 +52,9 @@ theremin/
 │   ├── RESEARCH-STANDARDS.md
 │   ├── CAPACITORS.md
 │   ├── PITCH-OSCILLATOR.md
-│   └── ANTENNA-CAPACITIVE-SENSOR.md
+│   ├── ANTENNA-CAPACITIVE-SENSOR.md
+│   ├── VOLUME-OSCILLATOR.md
+│   └── VOLTAGE-CONTROLLED-AMP.md
 ├── circuits/                                    # schematics, one directory per candidate design
 │   ├── DIAGRAMMING.md                           # diagram tooling/convention decision
 │   ├── OSCILLATOR-DESIGNS.md                    # index + comparison, ordered least → most complex
@@ -65,15 +67,28 @@ theremin/
 │   ├── oscillator-3-comparator-lm393/           # 7 parts
 │   │   ├── README.md
 │   │   └── diagram.mmd
-│   ├── oscillator-4-hartley-heterodyne-historical/  # 17 parts
+│   ├── oscillator-4-rca-historical/             # 28 parts — historical: the 1929 RCA pitch channel, JFETs for tubes
 │   │   ├── README.md
 │   │   └── diagram.mmd
 │   └── oscillator-5-colpitts-heterodyne/        # 21 parts — most complex
 │       ├── README.md
 │       └── diagram.mmd
-│   └── antenna-sensor/                          # the sensor half of the pitch circuit
-│       ├── README.md
-│       └── diagram.mmd
+│   ├── antenna-sensor/                          # the sensor half of the pitch circuit
+│   │   ├── README.md
+│   │   └── diagram.mmd
+│   ├── VOLUME-DESIGNS.md                        # index + comparison: five volume mirrors of the pitch designs
+│   ├── volume-1-cmos-inverter/                  # 13 parts — each mirrors its oscillator-N twin
+│   ├── volume-2-555-timer/                      # 15 parts
+│   ├── volume-3-comparator-lm393/               # 17 parts
+│   ├── volume-4-rca-historical/                 # 16 parts — historical: the RCA detuned-loop volume channel
+│   ├── volume-5-colpitts/                       # 30 parts
+│   ├── VCA-DESIGNS.md                           # index + comparison: five amplitude-control (VCA) designs
+│   ├── vca-1-opto/                              # 5 parts
+│   ├── vca-2-ota-lm13700/                       # 10 parts
+│   ├── vca-3-that2180/                          # 11 parts
+│   ├── vca-4-jfet-attenuator/                   # 13 parts
+│   └── vca-5-rca-historical/                    # 17 parts — historical: the 1929 RCA gain control, JFETs for tubes
+│       (each volume and VCA directory holds a README.md and a diagram.mmd, like the oscillators)
 └── arduino/                                     # sketches, once we get to the software bridge
 ```
 
@@ -130,6 +145,24 @@ the five oscillator designs above — is in
 [circuits/antenna-sensor/](circuits/antenna-sensor/README.md). True to
 the physics in ANTENNA-CAPACITIVE-SENSOR.md, it turned out to be exactly
 as simple as expected: one wire, no dedicated sensing circuit.
+
+The volume half of the instrument is documented the same way. How
+volume is sensed, what the volume subsystem hands the amplifier (one DC
+control voltage), and the hardware-only and pure-source scope are in
+[VOLUME-OSCILLATOR.md](notes/VOLUME-OSCILLATOR.md); the amplifier that
+multiplies the pitch audio by that voltage is in
+[VOLTAGE-CONTROLLED-AMP.md](notes/VOLTAGE-CONTROLLED-AMP.md). Five
+volume designs, each paired with one of the five pitch oscillators (four
+mirror their twin; the historical one is the RCA's detuned-loop
+channel), are in
+[VOLUME-DESIGNS.md](circuits/VOLUME-DESIGNS.md), and five amplitude
+control (VCA) designs (four modern, one historical) are in
+[VCA-DESIGNS.md](circuits/VCA-DESIGNS.md). The three historical designs
+follow Theremin's patent and the RCA schematic, with JFETs in the tubes'
+roles; why JFETs, and what a purpose-built tube emulation could add, is
+in [TUBE-EMULATION.md](notes/TUBE-EMULATION.md).
+Because they meet only at the control voltage and the audio, any pitch,
+volume and VCA design is meant to combine with any other.
 
 ## Status
 

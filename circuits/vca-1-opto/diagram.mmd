@@ -1,0 +1,21 @@
+flowchart TD
+  GND(("Ground"))
+  AUDIOIN(("Pitch Audio Input"))
+  CVIN(("Volume Control Voltage Input"))
+  AUDIOOUT(("Scaled Audio Output"))
+
+  INPUT_COUPLE["Input Coupling Capacitor, ~1 µF"]
+  PHOTORESISTOR["Photoresistor (CdS cell)"]
+  LOAD_R["Load Resistor, ~47 kΩ"]
+  LED_R["LED Series Resistor, ~1 kΩ"]
+  LED_DIODE["Control Diode (red LED)"]
+
+  AUDIOIN --- INPUT_COUPLE
+  INPUT_COUPLE --- PHOTORESISTOR
+  PHOTORESISTOR --- AUDIOOUT
+  AUDIOOUT --- LOAD_R
+  LOAD_R --- GND
+  CVIN --- LED_R
+  LED_R ---|"Anode"| LED_DIODE
+  LED_DIODE ---|"Cathode"| GND
+  LED_DIODE -. "Light Coupling\n(not a wire)" .- PHOTORESISTOR

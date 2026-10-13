@@ -8,7 +8,9 @@ upstream, shared in concept with pitch (see
 [ANTENNA-CAPACITIVE-SENSOR.md](ANTENNA-CAPACITIVE-SENSOR.md)). The stage that consumes
 that voltage is in [VOLTAGE-CONTROLLED-AMP.md](VOLTAGE-CONTROLLED-AMP.md). None of Designs 1–5 in
 [../circuits/OSCILLATOR-DESIGNS.md](../circuits/OSCILLATOR-DESIGNS.md)
-has a volume antenna input — each diagram has exactly one `ANTENNA` node.
+has a volume antenna input — each diagram has exactly one `ANTENNA` node
+— so each now has a volume mirror, indexed in
+[../circuits/VOLUME-DESIGNS.md](../circuits/VOLUME-DESIGNS.md).
 
 ## Subsystem boundary
 
@@ -33,10 +35,10 @@ Output contract (every value is proposed or TBD, for the reviewer):
 | Signal | Single-ended DC voltage, referenced to ground |
 | Polarity | Higher voltage = louder (hand away = high) |
 | Floor | Hand fully down gives a defined floor voltage the VCA treats as silence (proposed 0 V) |
-| Full scale | TBD; set by the VCA's control range and the supply |
-| Source impedance | Low enough to drive the VCA control input without loading; TBD |
-| Speed | Follows the hand at articulation speed (tens of ms or faster); TBD |
-| Noise and ripple | Below audibility at the floor once through the VCA; TBD |
+| Full scale | Half the supply voltage (6 V on 12 V), proposed: the converters' ratiometric output lands there at any supply, and it is the virtual ground's level, where the exponential VCA's unity gain falls |
+| Source impedance | Low: the converter's emitter-follower output (datasheet: sources 10 mA, sinks 50 mA); the 100 kΩ-class loads of the VCA designs are far above it |
+| Speed | Follows the hand at articulation speed (tens of ms or faster): about 24 ms with the heterodyne designs' illustrative values, about 47 ms with the relaxation designs' |
+| Noise and ripple | Below audibility at the floor once through the VCA; TBD. The converter's ripple is about 1% of full scale in the heterodyne designs and about 1.5% in the relaxation designs, which is not yet good enough for the quiet end |
 | Law | Linear in the sensed level; the gain law belongs to the VCA (proposed) |
 | Calibration | Zero-point trim and range set here, never in the VCA |
 
@@ -91,7 +93,14 @@ below demand.
 
 ## Frequency shift to control voltage (inside this subsystem)
 
-Two candidate routes (decision open; see the open questions below):
+Two candidate routes. The circuit designs
+([../circuits/VOLUME-DESIGNS.md](../circuits/VOLUME-DESIGNS.md)) took the
+second for four of the five volume designs, as an LM2907-N
+frequency-to-voltage converter fed by the beat (Design 5) or directly
+by the relaxation oscillator (Designs 1 to 3). The fifth, Design 4, is
+the 1929 RCA's historical channel: a single oscillator and a detuned
+loop, rectified directly (no converter). The reasons are at the end of
+this section.
 
 - **Slope (resonance) detector.** The volume oscillator drives a fixed
   resonant LC circuit through a diode detector. At the oscillator's
@@ -201,10 +210,10 @@ bench):
 ## What carries over unchanged
 
 - LC tank with the antenna as a single wire into the sensing node
-  (Design 4's collector or Design 5's emitter lead), high-Q so a few pF
+  (Design 5's emitter lead; in Design 4, the antenna branch's series coil), high-Q so a few pF
   of hand capacitance matters.
 - C0G/NP0 or polypropylene tank capacitors ([CAPACITORS.md](CAPACITORS.md)).
-- Reusing whichever of Designs 4/5 is chosen for pitch, rather than
+- Reusing the chosen pitch design's oscillator (for Design 4, its reference oscillator), rather than
   designing a separate oscillator, so both channels drift alike.
 
 ## Differences
@@ -244,17 +253,40 @@ bench):
 
 ## Open questions for the reviewer
 
-1. Slope detector against a passive resonant circuit, or a second fixed
-   oscillator plus beat-to-voltage conversion? The first matches the
-   references below; the second reuses more of the existing designs.
-2. How far apart should the volume and pitch frequencies sit? No numeric
-   guidance has been researched yet.
-3. If Designs 1–3 were chosen for pitch, is an LC volume oscillator still
-   preferable? Probably yes (a RC relaxation volume channel has little
-   resonance to detect against), but this is untested reasoning.
+1. Answered for the drawn designs: the beat plus frequency-to-voltage
+   route. The slope detector on the *RF* oscillator needs a small
+   total tank capacitance (100 to 200 pF) and a high Q; at the nF-scale
+   tank the pitch designs imply, a 5 pF hand change leaves 99% of the
+   amplitude at Q = 100. A slope detector at an *offset* (difference)
+   frequency, as in the Seven Transistor Labs build, does work and is
+   noted as a candidate sixth design. Is that the right call?
+2. How far apart should the volume and pitch frequencies sit? The
+   builds read put them tens of percent apart: DEAK Software runs the
+   pitch pair at 1.06 MHz and the volume pair at 715 kHz; Seven
+   Transistor Labs detunes with series tank capacitors (470 pF on the
+   volume oscillator, 1.5 nF on the pitch oscillator). No rule has been
+   derived.
+3. Resolved: the volume designs are independent of which pitch design is
+   used (the contract is just the control voltage), so a relaxation
+   pitch oscillator can sit beside a heterodyne volume channel and the
+   reverse. The relaxation volume designs are expected to be the poorest
+   (see below), and a UIUC project that tried one abandoned it.
+
+### Why a frequency is counted rather than an amplitude detected
+
+A converter's output is proportional to the frequency it counts. Fed
+the *beat* of a heterodyne pair, that is zero at zero beat and carries
+the whole hand movement. Fed an oscillator directly (Designs 1 to 3), it
+is a large constant with the hand's few-percent contribution on top,
+which is why those need a floor trimmer and about 30× gain and are
+expected to be poorer. A slope detector on the RF oscillator itself was
+worked out and rejected for needing a small, high-Q tank (see
+[../circuits/VOLUME-DESIGNS.md](../circuits/VOLUME-DESIGNS.md)).
 
 ## Research links
 
-- [Theremin — Seven Transistor Labs](https://www.seventransistorlabs.com/Theremin/) — the same build log cited in PITCH-OSCILLATOR.md; describes the volume channel as a variable oscillator, detuned from the pitch oscillator, feeding a slope/voltage-doubler detector. *These details came from a summarised fetch of the page, not a full read; the reviewer should confirm them against the page and its schematics.*
+- [Theremin — Seven Transistor Labs](https://www.seventransistorlabs.com/Theremin/) — the same build log cited in PITCH-OSCILLATOR.md. Now read in full: the volume VFO and the local oscillator go to a BJT mixer, and a slope detector (a resonant tank and a voltage-doubler Schottky pair) on the difference frequency makes the DC that biases the pitch mixer.
+- [Building a Theremin — DEAK Software](https://deaksoftware.com.au/articles/building_a_theremin/) — a complete all-hardware design whose volume path is a copy of its pitch path followed by a frequency-to-voltage converter. Schematic figures read; prose seen only as a search summary.
+- [Pat Tarantino, "Theremin" (UIUC Physics 406)](https://courses.physics.illinois.edu/phys406/sp2017/Student_Projects/Spring01/PTarantino/Pat_Tarantino_Theremin.pdf) — an LM2917 volume circuit abandoned because the oscillator pairs could not be brought to zero beat. Read in full for that section.
 - [Theremin World — Silicon Chip Theremin Modifications](http://www.thereminworld.com/Article/14272/silicon-chip-theremin-modifications) and [How the Theremin Works (UAF)](http://ffden-2.phys.uaf.edu/211.fall2000.web.projects/Jennifer%20Erland/How%20it%20Works.html) — descriptions of the classic volume loop: antenna capacitance detunes an LC circuit, lowering its resonant response, which is detected to a DC value. *Seen only as search-result summaries; not yet read in full or checked against an engineering-level source per [RESEARCH-STANDARDS.md](RESEARCH-STANDARDS.md).*
 - [Physics of the Theremin (Skeldon et al., 1998)](https://isidore.co/misc/Physics%20papers%20and%20books/Zotero/storage/3837CDJ6/Skeldon%20et%20al.%20-%201998%20-%20Physics%20of%20the%20Theremin.pdf) — the engineering-level cross-check already in PITCH-OSCILLATOR.md; not yet re-read for its volume-circuit treatment.

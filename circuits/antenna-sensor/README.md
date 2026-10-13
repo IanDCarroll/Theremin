@@ -81,10 +81,14 @@ discharging; Designs 4–5's resonant LC tank rings much closer to a sine
 wave. As for a DC-to-AC "conversion point" — there isn't a separate
 component for that. The oscillator's active device switching the
 battery's DC between the rails *is* the AC-generation mechanism; the
-two aren't sequential steps. And within this signal path, it never
+two aren't sequential steps. And within the *pitch* signal path, it never
 converts back to true DC — the mixer stage (Designs 4–5) shifts it down
 to audio frequency but it's still AC, and it needs to stay AC all the
 way to a speaker, since a speaker cone has to alternate to make sound.
+The volume channel is the deliberate exception: it uses the same
+antenna and the same kind of oscillator, but its job is to turn that AC
+back into a slowly varying DC control voltage (see
+[VOLUME-DESIGNS.md](../VOLUME-DESIGNS.md)).
 The only point where this stops being "AC" in the ordinary sense is if
 it's later digitized (an ADC or a microcontroller's digital input) —
 which is a different regime (discrete, sampled logic levels), not a

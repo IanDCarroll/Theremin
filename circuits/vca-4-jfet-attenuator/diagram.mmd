@@ -1,0 +1,57 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  AUDIOIN(("Pitch Audio Input"))
+  CVIN(("Volume Control Voltage Input"))
+  AUDIOOUT(("Scaled Audio Output"))
+
+  subgraph BIAS["Virtual Ground"]
+    VREF_IC{{"Virtual Ground IC (TLE2426)"}}
+
+    PWR ---|"Input (IN)"| VREF_IC
+    VREF_IC ---|"Common (COMMON)"| GND
+  end
+
+  subgraph ATTEN["JFET Attenuator and Output Buffer"]
+    JFET{{"N-Channel JFET (2N5484)"}}
+    INPUT_COUPLE["Input Coupling Capacitor, ~1 µF"]
+    SERIES_R["Series Resistor, ~47 kΩ"]
+    DC_PATH_R["Drain DC Return Resistor, ~1 MΩ"]
+    LIN_DRAIN_R["Linearizing Resistor (Drain to Gate), ~1 MΩ"]
+    LIN_SOURCE_R["Linearizing Resistor (Source to Gate), ~1 MΩ"]
+    OUTPUT_COUPLE["Output Coupling Capacitor, ~1 µF"]
+
+    AUDIOIN --- INPUT_COUPLE
+    INPUT_COUPLE --- SERIES_R
+    SERIES_R ---|"Drain"| JFET
+    JFET ---|"Drain"| DC_PATH_R
+    DC_PATH_R ---|"Output (OUT)"| VREF_IC
+    JFET ---|"Source / Output (OUT)"| VREF_IC
+    JFET ---|"Drain"| LIN_DRAIN_R
+    LIN_DRAIN_R ---|"Gate"| JFET
+    JFET ---|"Source"| LIN_SOURCE_R
+    LIN_SOURCE_R ---|"Gate"| JFET
+    JFET ---|"Drain / Pin 5 (2IN+)"| OPAMP
+    OPAMP ---|"Pin 7 (2OUT) and Pin 6 (2IN−)"| OUTPUT_COUPLE
+    OUTPUT_COUPLE --- AUDIOOUT
+  end
+
+  subgraph GATEDRIVE["Gate Drive"]
+    OPAMP{{"Dual Op Amp IC (TL072), both amplifiers used"}}
+    GATE_R["Gate Drive Resistor, ~1 MΩ"]
+    CV_IN_R["Control Input Resistor, ~100 kΩ"]
+    OFFSET_R["Offset Resistor, ~100 kΩ"]
+    FEEDBACK_R["Gate Drive Feedback Resistor, ~39 kΩ"]
+
+    CVIN --- CV_IN_R
+    CV_IN_R ---|"Pin 2 (1IN−)"| OPAMP
+    PWR --- OFFSET_R
+    OFFSET_R ---|"Pin 2 (1IN−)"| OPAMP
+    OPAMP ---|"Pin 1 (1OUT)"| FEEDBACK_R
+    FEEDBACK_R ---|"Pin 2 (1IN−)"| OPAMP
+    VREF_IC ---|"Output (OUT) / Pin 3 (1IN+)"| OPAMP
+    OPAMP ---|"Pin 1 (1OUT)"| GATE_R
+    GATE_R ---|"Gate"| JFET
+    OPAMP ---|"Pin 8 (VCC+)"| PWR
+    OPAMP ---|"Pin 4 (VCC−)"| GND
+  end

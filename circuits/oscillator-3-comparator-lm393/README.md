@@ -12,6 +12,16 @@ generally designed for open-loop comparator duty (slow slew rate,
 outputs that don't swing fully to the rails) — an LM393 is a common,
 well-documented, low-cost part built for exactly this job.
 
+**Volume mirror.** This design and
+[Volume Design 3](../volume-3-comparator-lm393/README.md) mirror each
+other: the volume design is this same oscillator on a volume antenna,
+followed by a stage that turns its hand-dependent AC into a DC control
+voltage (see [VOLUME-DESIGNS.md](../VOLUME-DESIGNS.md)). A change to
+this circuit's topology should be carried over to its mirror, and vice
+versa. Component values may differ on purpose, since the volume
+oscillator has to sit away from the pitch oscillator's frequency; the
+volume README lists each difference.
+
 **Performance — pros and cons (expected, not yet bench-verified):**
 - **Pro:** We set our own switching thresholds via the Hysteresis
   Divider Resistors, rather than relying on a fixed internal ratio —

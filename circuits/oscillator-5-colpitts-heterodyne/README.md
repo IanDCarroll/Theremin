@@ -18,26 +18,39 @@ Each oscillator uses a **Colpitts** topology — an untapped inductor
 plus a two-capacitor divider for feedback — because, like the
 [Seven Transistor Labs](https://www.seventransistorlabs.com/Theremin/)
 build this follows, it's easier to wind a plain coil than a tapped one.
-Compare with [Design 4](../oscillator-4-hartley-heterodyne-historical/README.md),
-which uses a tapped-coil Hartley topology instead.
+Compare with [Design 4](../oscillator-4-rca-historical/README.md),
+the historical analog of the 1929 RCA theremin, whose Armstrong
+oscillators use coupled grid and plate coils instead.
+
+**Volume mirror.** This design and
+[Volume Design 5](../volume-5-colpitts/README.md) mirror each other:
+the volume design is this same oscillator on a volume antenna,
+followed by a stage that turns its hand-dependent AC into a DC control
+voltage (see [VOLUME-DESIGNS.md](../VOLUME-DESIGNS.md)). A change to
+this circuit's topology should be carried over to its mirror, and vice
+versa. Component values may differ on purpose, since the volume
+oscillator has to sit away from the pitch oscillator's frequency; the
+volume README lists each difference.
 
 **Performance — pros and cons (expected, not yet bench-verified):**
 - **Pro:** Same full heterodyne sensitivity gain as Design 4 — the
   widest, most expressive pitch range of the five (see
   [PITCH-OSCILLATOR.md](../../notes/PITCH-OSCILLATOR.md)).
-- **Pro:** Uses only ordinary off-the-shelf components — no hand-wound
-  tapped coil — meaningfully easier to build correctly than Design 4
-  despite the similar part count.
+- **Pro:** Uses only ordinary off-the-shelf components, with one plain
+  untapped coil per oscillator, so it is meaningfully easier to build
+  correctly than Design 4's six hand-wound coils.
 - **Pro:** A very common, well-documented oscillator topology, so
   there's substantial reference material available for tuning and
   troubleshooting.
 - **Con:** Still inherits every heterodyne downside: two oscillators to
   match and keep in tune, and absolute pitch drift risk if either one
   drifts with temperature, humidity, or component aging.
-- **Con:** Highest total part count of the five (21) — most assembly
-  time and the most potential wiring mistakes on a breadboard.
-- **Con:** Same lossy, nonlinear diode-mixer limitation as Design 4 —
-  likely needs a buffer/amplifier stage before the output is usable.
+- **Con:** The most parts of the modern designs (21; Design 4 has 28)
+  — much assembly time and many potential wiring mistakes on a
+  breadboard.
+- **Con:** A lossy, nonlinear diode mixer (Design 4's two-input mixer
+  differs) — likely needs a buffer/amplifier stage before the output is
+  usable.
 - **Con:** The capacitive feedback divider needs reasonably well-matched
   capacitor values to hit its intended feedback fraction — a practical
   tuning burden the single-oscillator designs (1–3) don't have.

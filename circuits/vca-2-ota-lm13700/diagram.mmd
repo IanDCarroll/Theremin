@@ -1,0 +1,44 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  AUDIOIN(("Pitch Audio Input"))
+  CVIN(("Volume Control Voltage Input"))
+  AUDIOOUT(("Scaled Audio Output"))
+
+  subgraph BIAS["Virtual Ground"]
+    VREF_IC{{"Virtual Ground IC (TLE2426)"}}
+
+    PWR ---|"Input (IN)"| VREF_IC
+    VREF_IC ---|"Common (COMMON)"| GND
+  end
+
+  subgraph VCA["Transconductance Amplifier"]
+    OTA{{"Dual OTA IC (LM13700), one amplifier used"}}
+    INPUT_COUPLE["Input Coupling Capacitor, ~1 µF"]
+    INPUT_R["Input Resistor, ~30 kΩ"]
+    BALANCE_TRIM["Balance Trimmer, ~1 kΩ"]
+    DIODE_BIAS_R["Diode Bias Resistor, ~5.1 kΩ"]
+    CONTROL_R["Control Current Resistor, ~9.1 kΩ"]
+    LOAD_R["Load Resistor, ~30 kΩ"]
+    BUFFER_R["Buffer Load Resistor, ~5 kΩ"]
+    OUTPUT_COUPLE["Output Coupling Capacitor, ~1 µF"]
+
+    AUDIOIN --- INPUT_COUPLE
+    INPUT_COUPLE --- INPUT_R
+    INPUT_R ---|"Pin 3 (Input+ A)"| OTA
+    OTA ---|"Pin 3 (Input+ A) / End (Input+ Side)"| BALANCE_TRIM
+    OTA ---|"Pin 4 (Input− A) / End (Input− Side)"| BALANCE_TRIM
+    VREF_IC ---|"Output (OUT) / Wiper"| BALANCE_TRIM
+    PWR --- DIODE_BIAS_R
+    DIODE_BIAS_R ---|"Pin 2 (Diode Bias A)"| OTA
+    CVIN --- CONTROL_R
+    CONTROL_R ---|"Pin 1 (Amp Bias Input A)"| OTA
+    OTA ---|"Pin 5 (Output A) and Pin 7 (Buffer Input A)"| LOAD_R
+    LOAD_R ---|"Output (OUT)"| VREF_IC
+    OTA ---|"Pin 8 (Buffer Output A)"| BUFFER_R
+    BUFFER_R --- GND
+    OTA ---|"Pin 8 (Buffer Output A)"| OUTPUT_COUPLE
+    OUTPUT_COUPLE --- AUDIOOUT
+    OTA ---|"Pin 11 (V+)"| PWR
+    OTA ---|"Pin 6 (V−)"| GND
+  end

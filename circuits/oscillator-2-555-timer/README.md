@@ -12,8 +12,18 @@ directly into the timing network. See
 [PITCH-OSCILLATOR.md](../../notes/PITCH-OSCILLATOR.md) for why this
 direct-RC approach trades sensitivity for simplicity compared to the
 heterodyne designs
-([4](../oscillator-4-hartley-heterodyne-historical/README.md),
+([4](../oscillator-4-rca-historical/README.md),
 [5](../oscillator-5-colpitts-heterodyne/README.md)).
+
+**Volume mirror.** This design and
+[Volume Design 2](../volume-2-555-timer/README.md) mirror each other:
+the volume design is this same oscillator on a volume antenna,
+followed by a stage that turns its hand-dependent AC into a DC control
+voltage (see [VOLUME-DESIGNS.md](../VOLUME-DESIGNS.md)). A change to
+this circuit's topology should be carried over to its mirror, and vice
+versa. Component values may differ on purpose, since the volume
+oscillator has to sit away from the pitch oscillator's frequency; the
+volume README lists each difference.
 
 **Performance — pros and cons (expected, not yet bench-verified):**
 - **Pro:** The classic NE555's documented operating range (4.5–16V)

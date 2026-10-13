@@ -1,0 +1,110 @@
+flowchart TD
+  PWR(("Power Supply Positive"))
+  GND(("Ground"))
+  ANTENNA(("Volume Antenna"))
+  VOLUMEOUT(("Volume Control Voltage Output"))
+
+  subgraph FO["Volume Fixed Oscillator"]
+    FO_Q{{"NPN Transistor (2N3904)"}}
+    FO_IND["Tank Inductor, ~40 µH"]
+    FO_CAP_UP["Feedback Capacitor (Upper)"]
+    FO_CAP_LOW["Feedback Capacitor (Lower)"]
+    FO_BIAS_UP["Base Bias Resistor (Upper), ~47 kΩ"]
+    FO_BIAS_LOW["Base Bias Resistor (Lower), ~10 kΩ"]
+    FO_BYPASS["Base Bypass Capacitor, ~10 nF"]
+    FO_EMIT_R["Emitter Resistor, ~1 kΩ"]
+    FO_COUPLE["Output Coupling Capacitor"]
+
+    PWR --- FO_IND
+    FO_IND ---|"Collector"| FO_Q
+    FO_Q ---|"Collector"| FO_COUPLE
+    FO_Q ---|"Collector"| FO_CAP_UP
+    FO_Q ---|"Emitter"| FO_CAP_UP
+    FO_Q ---|"Emitter"| FO_CAP_LOW
+    FO_CAP_LOW --- GND
+    FO_Q ---|"Emitter"| FO_EMIT_R
+    FO_EMIT_R --- GND
+    PWR --- FO_BIAS_UP
+    FO_BIAS_UP ---|"Base"| FO_Q
+    FO_Q ---|"Base"| FO_BIAS_LOW
+    FO_BIAS_LOW --- GND
+    FO_Q ---|"Base"| FO_BYPASS
+    FO_BYPASS --- GND
+  end
+
+  subgraph VO["Volume Variable Antenna Oscillator"]
+    VO_Q{{"NPN Transistor (2N3904)"}}
+    VO_IND["Tank Inductor, ~40 µH"]
+    VO_CAP_UP["Feedback Capacitor (Upper)"]
+    VO_CAP_LOW["Feedback Capacitor (Lower)"]
+    VO_BIAS_UP["Base Bias Resistor (Upper), ~47 kΩ"]
+    VO_BIAS_LOW["Base Bias Resistor (Lower), ~10 kΩ"]
+    VO_BYPASS["Base Bypass Capacitor, ~10 nF"]
+    VO_EMIT_R["Emitter Resistor, ~1 kΩ"]
+    VO_COUPLE["Output Coupling Capacitor"]
+
+    PWR --- VO_IND
+    VO_IND ---|"Collector"| VO_Q
+    VO_Q ---|"Collector"| VO_COUPLE
+    VO_Q ---|"Collector"| VO_CAP_UP
+    VO_Q ---|"Emitter"| VO_CAP_UP
+    VO_Q ---|"Emitter"| VO_CAP_LOW
+    VO_CAP_LOW --- GND
+    VO_Q ---|"Emitter"| ANTENNA
+    VO_Q ---|"Emitter"| VO_EMIT_R
+    VO_EMIT_R --- GND
+    PWR --- VO_BIAS_UP
+    VO_BIAS_UP ---|"Base"| VO_Q
+    VO_Q ---|"Base"| VO_BIAS_LOW
+    VO_BIAS_LOW --- GND
+    VO_Q ---|"Base"| VO_BYPASS
+    VO_BYPASS --- GND
+  end
+
+  subgraph MIX["Mixer and Low-Pass Filter"]
+    MIX_DIODE["Mixer Diode (1N4148)"]
+    LPF_RES["Low-Pass Filter Resistor, ~10 kΩ"]
+    LPF_CAP["Low-Pass Filter Capacitor, ~1 nF"]
+    LPF2_RES["Second Low-Pass Filter Resistor, ~10 kΩ"]
+    LPF2_CAP["Second Low-Pass Filter Capacitor, ~1 nF"]
+    MIX_OUT@{ shape: fork, label: "Junction, Mixer Output" }
+    BEAT_OUT@{ shape: fork, label: "Junction, Filtered Beat" }
+
+    FO_COUPLE ---|"Anode"| MIX_DIODE
+    VO_COUPLE ---|"Anode"| MIX_DIODE
+    MIX_DIODE ---|"Cathode"| MIX_OUT
+    MIX_OUT --- LPF_RES
+    LPF_RES --- GND
+    MIX_OUT --- LPF_CAP
+    LPF_CAP --- GND
+    MIX_OUT --- LPF2_RES
+    LPF2_RES --- BEAT_OUT
+    BEAT_OUT --- LPF2_CAP
+    LPF2_CAP --- GND
+  end
+
+  subgraph F2V["Frequency-to-Voltage Converter"]
+    F2V_IC{{"Frequency-to-Voltage IC (LM2907-N, 8-pin)"}}
+    F2V_INPUT_COUPLE["Input Coupling Capacitor, ~330 nF"]
+    F2V_INPUT_R["Input Bias Resistor, ~100 kΩ"]
+    F2V_TIMING_CAP["Pump Timing Capacitor, ~1 nF"]
+    F2V_OUTPUT_R["Pump Output Resistor, ~240 kΩ"]
+    F2V_RIPPLE_CAP["Ripple Filter Capacitor, ~100 nF"]
+    F2V_LOAD_R["Emitter Load Resistor, ~10 kΩ"]
+
+    BEAT_OUT --- F2V_INPUT_COUPLE
+    F2V_INPUT_COUPLE ---|"Pin 1 (TACH+)"| F2V_IC
+    F2V_IC ---|"Pin 1 (TACH+)"| F2V_INPUT_R
+    F2V_INPUT_R --- GND
+    F2V_IC ---|"Pin 8 (TACH−/GND)"| GND
+    F2V_IC ---|"Pin 2 (CP1)"| F2V_TIMING_CAP
+    F2V_TIMING_CAP --- GND
+    F2V_IC ---|"Pin 3 (CP2/IN+)"| F2V_OUTPUT_R
+    F2V_OUTPUT_R --- GND
+    F2V_IC ---|"Pin 3 (CP2/IN+)"| F2V_RIPPLE_CAP
+    F2V_RIPPLE_CAP --- GND
+    F2V_IC ---|"Pin 5 (COL) and Pin 6 (V+)"| PWR
+    F2V_IC ---|"Pin 4 (EMIT)"| F2V_LOAD_R
+    F2V_LOAD_R --- GND
+    F2V_IC ---|"Pin 4 (EMIT) and Pin 7 (IN−)"| VOLUMEOUT
+  end

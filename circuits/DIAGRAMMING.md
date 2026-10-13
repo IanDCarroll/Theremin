@@ -39,9 +39,10 @@ later.
 
 ## File organization: prose vs. diagram source
 
-Each circuit element — an oscillator design, the antenna sensor, and
-whatever comes next as we work through the rest of the theremin's
-signal chain — gets its own directory, holding exactly two files:
+Each circuit element — an oscillator design, the antenna sensor, a
+volume design, a VCA design, and whatever comes next as we work through
+the rest of the theremin's signal chain — gets its own directory,
+holding exactly two files:
 
 - **`diagram.mmd`** — the raw Mermaid source, and nothing else. No
   markdown fencing, no prose. This is the machine-readable artifact:
@@ -94,6 +95,8 @@ actually shop for and place parts on a breadboard.
    A plain two-lead passive (an ordinary resistor or non-polarized
    capacitor) doesn't need its leads labeled — there's no ambiguity
    about which end is which.
+   A potentiometer or trimmer is a three-lead part too: label its two
+   ends and its wiper.
 6. **A polarity-sensitive two-lead part gets its leads labeled anyway**
    — a diode's `"Anode"` / `"Cathode"`, since which way it faces
    changes what the circuit does even though it only has two leads.
@@ -102,7 +105,11 @@ actually shop for and place parts on a breadboard.
    rails, the final signal output, and (at whatever level of detail a
    given diagram is scoped to) the player. An internal wiring junction
    between components is not a circle; it's just wherever two or more
-   edges happen to land on the same component's lead.
+   edges happen to land on the same component's lead. Where no
+   component lead can take the wires, see rule 12. A diagram scoped to
+   one block of the instrument makes that block's own inputs and
+   outputs circles (Pitch Audio Input, Volume Control Voltage Output,
+   Scaled Audio Output).
 8. **A wire between two components carries no label unless it's
    identifying a pin (rules 3–6).** What's on each end already says
    what the connection is — a label repeating that would be noise.
@@ -130,7 +137,7 @@ actually shop for and place parts on a breadboard.
     or two, or whether a wire landed there by mistake. This was caught
     by exactly that confusion during review of the 555 design (a
     Threshold Resistor had picked up four connections instead of two)
-    and the Colpitts/Hartley mixer stage (a diode had picked up five);
+    and the Colpitts design's mixer stage (a diode had picked up five);
     both were fixed by moving the extra connections onto the IC and the
     Pitch Signal Output circle, respectively, rather than left piled on
     the passive.
@@ -143,9 +150,43 @@ actually shop for and place parts on a breadboard.
     air via a changing electric field — see
     [ANTENNA-CAPACITIVE-SENSOR.md](../notes/ANTENNA-CAPACITIVE-SENSOR.md)),
     we draw that connection dotted instead: `HAND -. "label" .- ANTENNA`.
+    The same goes for a light path, such as an LED lighting a
+    photoresistor in the [opto VCA](vca-1-opto/README.md), and for the
+    magnetic coupling between two coils on one core (the RCA historical
+    oscillators' grid and plate coils): two coil boxes joined by a dotted
+    line, since a transformer's windings share a core, not a wire.
     This came up because a solid line there would visually claim there's
     a wire a person could solder between a hand and a circuit, which
     isn't true and isn't what's meant.
+
+12. **A junction is a bar, drawn only where nothing else can be the
+    meeting point.** When three or more passive leads share one
+    electrical point and no hub-capable device sits there (no IC pin,
+    transistor lead, tapped-coil lead or I/O circle — rule 10 lists
+    them), there is nothing for the wires to land on without piling
+    them onto one passive, which rule 10 forbids. Draw that point as a
+    **junction bar**: a thin line, with each lead's wire attached to it.
+    It stands for the breadboard column strip those leads would be
+    plugged into — every hole in a strip is joined — and not for any
+    part or wire, so it is not a box, is not counted in a design's total
+    parts, and its wires carry no labels (except a diode's Anode or
+    Cathode, rule 6, and the end or wiper of a three-lead part, rule 5). Two leads sharing a point need no junction: that
+    is just a wire. In the Mermaid source a junction is
+    `NAME@{ shape: fork, label: "Junction, what it joins" }`; the bar
+    shows no text when rendered, so the label is for the reader of the
+    source and for agents. The `fork` shape needs Mermaid 11.3 or newer.
+    First used in the volume designs, where the mixer's output node and
+    the node after its second filter pole join the mixer diode, two
+    filter parts and the converter's coupling capacitor.
+
+13. **A mirrored diagram keeps its twin's node names.** Where one
+    design deliberately copies another (each
+    [volume design](VOLUME-DESIGNS.md) copies a pitch design's
+    oscillator circuit), the copied part keeps the same node IDs, labels
+    and wiring, apart from renamed antenna or output circles and
+    deliberate value changes, so a plain `diff` of the two `diagram.mmd`
+    files shows exactly what the second design adds or changes. Each
+    README says it mirrors the other and lists every value that differs.
 
 Where a package has pins we simply aren't using in a given design (e.g.
 we use one gate out of six in a hex inverter package, or one comparator
